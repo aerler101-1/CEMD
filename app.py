@@ -78,3 +78,54 @@ with tab5:
         plt.figure(figsize=(10, 6))
         sns.heatmap(crosstab, annot=True, fmt="d", cmap="YlGnBu")
         st.pyplot(plt)
+
+
+#----- tab 6: ftf -----
+
+tab6 = st.tabs(["FTF Growth by Teacher"])[0]
+
+with tab6:
+    st.subheader("Fall-to-Fall Growth Effectiveness by Math Teacher")
+
+    # Drop missing values
+    df_clean = df.dropna(subset=[
+        "math_growth", "ftf_2015_Fall_mathematics", "met_math_growth", "mat_teacher_1"
+    ])
+
+    # Group by teacher
+    summary = (
+        df_clean
+        .groupby("mat_teacher_1")
+        .agg(
+            num_students=("met_math_growth", "count"),
+            pct_met_goal=("met_math_growth", "mean"),
+            avg_growth=("math_growth", "mean"),
+            avg_target=("ftf_2015_Fall_mathematics", "mean")
+        )
+        .assign(growth_above_target=lambda d: d["avg_growth"] - d["avg_target"])
+        .query("num_students >= 5")
+        .sort_values("pct_met_goal", ascending=False)
+    )
+
+    # Select display metric
+    display_metric = st.selectbox(
+        "Choose Metric to Rank Teachers",
+        ["pct_met_goal", "growth_above_target", "avg_growth", "avg_target"]
+    )
+
+    # Plot bar chart
+    plt.figure(figsize=(10, 6))
+    sns.barplot(
+        data=summary.reset_index().sort_values(display_metric, ascending=False),
+        x="mat_teacher_1",
+        y=display_metric
+    )
+    plt.ylabel(display_metric.replace("_", " ").title())
+    plt.xlabel("Math Teacher")
+    plt.title(f"Math Teachers Ranked by {display_metric.replace('_', ' ').title()}")
+    plt.xticks(rotation=45)
+    st.pyplot(plt)
+
+    # Optional: show table
+    st.markdown("### Summary Table")
+    st.dataframe(summary.round(2).reset_index())
