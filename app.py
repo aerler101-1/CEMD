@@ -16,7 +16,7 @@ selected_grade = st.sidebar.multiselect("Grade (2015)", sorted(df["grade_2015"].
 selected_school = st.sidebar.multiselect("School (2015)", sorted(df["school_2015"].dropna().unique()))
 selected_math_teacher = st.sidebar.multiselect("Math Teacher", sorted(df["mat_teacher_1"].dropna().unique()))
 selected_ela_teacher = st.sidebar.multiselect("ELA Teacher", sorted(df["ela_teacher_1"].dropna().unique()))
-quantile_option = st.sidebar.selectbox("Group students by quartile of attendance_rate?", ["None", 4])
+quantile_option = st.sidebar.selectbox("Group students by test percentile quartile?", ["None", 4])
 
 # Apply filters
 df_filtered = df.copy()
@@ -29,8 +29,12 @@ if selected_math_teacher:
 if selected_ela_teacher:
     df_filtered = df_filtered[df_filtered["ela_teacher_1"].isin(selected_ela_teacher)]
 
-if quantile_option != "None":
-    df_filtered["attendance_quantile"] = pd.qcut(df_filtered["attendance_rate"], q=4, labels=["Q1", "Q2", "Q3", "Q4"])
+# Use most recent percentile for grouping if available
+test_percentile_cols = [col for col in df_filtered.columns if col.startswith("percentile_")]
+latest_percentile_col = sorted(test_percentile_cols)[-1] if test_percentile_cols else None
+
+if quantile_option != "None" and latest_percentile_col:
+    df_filtered["percentile_quantile"] = pd.qcut(df_filtered[latest_percentile_col], q=4, labels=["Q1", "Q2", "Q3", "Q4"])
 
 # Tabs for analysis
 st.title("MAP Growth Analysis Dashboard")
@@ -59,9 +63,9 @@ df_plot = df_filtered.dropna(subset=["growth_metric", x_axis, "school_2015"])
 
 if not df_plot.empty:
     plt.figure(figsize=(10, 6))
-    if quantile_option != "None":
-        sns.boxplot(data=df_plot, x="attendance_quantile", y="growth_metric", hue="school_2015")
-        plt.xlabel("Attendance Rate Quartile")
+    if quantile_option != "None" and "percentile_quantile" in df_plot.columns:
+        sns.boxplot(data=df_plot, x="percentile_quantile", y="growth_metric", hue="school_2015")
+        plt.xlabel("Test Percentile Quartile")
     else:
         sns.scatterplot(data=df_plot, x=x_axis, y="growth_metric", hue="school_2015", alpha=0.6)
         plt.axhline(y=0, color="gray", linestyle="--")
