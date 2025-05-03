@@ -129,3 +129,40 @@ with tab6:
     # Optional: show table
     st.markdown("### Summary Table")
     st.dataframe(summary.round(2).reset_index())
+    
+    
+    # ---------- Tab 7: Explore Growth Across Terms ----------
+tab7 = st.tabs(["Explore RIT Growth Across Terms"])[0]
+
+with tab7:
+    st.subheader("Explore MAP Growth Between Terms")
+
+    growth_options = {
+        "Fall 2015 → Fall 2016": ("rit_2015_Fall_", "rit_2016_Fall_"),
+        "Fall 2015 → Winter 2015": ("rit_2015_Fall_", "rit_2015_Winter_"),
+        "Winter 2015 → Winter 2016": ("rit_2015_Winter_", "rit_2016_Winter_"),
+    }
+
+    subject = st.selectbox("Select Subject", ["mathematics", "reading"])
+    growth_label = st.selectbox("Select Growth Window", list(growth_options.keys()))
+    x_axis = st.selectbox("X-axis (Predictor)", ["attendance_rate", "tardy_rate"])
+
+    col1_prefix, col2_prefix = growth_options[growth_label]
+    col1 = f"{col1_prefix}{subject}"
+    col2 = f"{col2_prefix}{subject}"
+
+    df["growth_metric"] = df[col2] - df[col1]
+
+    df_plot = df.dropna(subset=["growth_metric", x_axis, "school_2015"])
+
+    if not df_plot.empty:
+        plt.figure(figsize=(10, 6))
+        sns.scatterplot(data=df_plot, x=x_axis, y="growth_metric", hue="school_2015", alpha=0.6)
+        plt.axhline(y=0, color="gray", linestyle="--")
+        plt.title(f"{growth_label} RIT Growth in {subject.title()} vs {x_axis.replace('_', ' ').title()}")
+        plt.xlabel(x_axis.replace("_", " ").title())
+        plt.ylabel("RIT Growth")
+        st.pyplot(plt)
+    else:
+        st.warning("No matching data for selected growth window and subject.")
+
