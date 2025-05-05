@@ -105,7 +105,7 @@ teacher_palette = sns.color_palette("tab10")
 
 # ----------------- MATH -----------------
 summary_math = (
-    df_filtered
+    df
     .dropna(subset=["math_growth", "ftf_2015_Fall_mathematics", "mat_teacher_1", "grade_2015"])
     .groupby(["mat_teacher_1", "grade_2015"], as_index=False)
     .agg(
