@@ -6,7 +6,10 @@ import matplotlib.pyplot as plt
 # Load the data
 @st.cache_data
 def load_data():
-    return pd.read_csv("student_table_enriched.csv")
+    df = pd.read_csv("student_table_enriched.csv")
+    df["mat_teacher_1"] = df["mat_teacher_1"].astype(str)
+    df["ela_teacher_1"] = df["ela_teacher_1"].astype(str)
+    return df
 
 df = load_data()
 
@@ -103,7 +106,7 @@ show_counts = st.checkbox("Show number of students on chart", value=True)
 summary_math = (
     df_filtered
     .dropna(subset=["math_growth", "ftf_2015_Fall_mathematics", "mat_teacher_1"])
-    .groupby("mat_teacher_1")
+    .groupby("mat_teacher_1", as_index=False)
     .agg(
         num_students=("met_math_growth", "count"),
         pct_met_goal=("met_math_growth", "mean"),
@@ -112,8 +115,7 @@ summary_math = (
     )
     .assign(growth_above_target=lambda df: df["avg_growth"] - df["avg_target"])
     .query("num_students >= 5")
-    .sort_values("pct_met_goal", ascending=True)  # Sort lowest to highest
-    .reset_index()
+    .sort_values("pct_met_goal", ascending=True)
 )
 
 st.markdown("**Mathematics:**")
@@ -132,7 +134,7 @@ else:
 summary_reading = (
     df_filtered
     .dropna(subset=["reading_growth", "ftf_2015_Fall_reading", "ela_teacher_1"])
-    .groupby("ela_teacher_1")
+    .groupby("ela_teacher_1", as_index=False)
     .agg(
         num_students=("met_reading_growth", "count"),
         pct_met_goal=("met_reading_growth", "mean"),
@@ -141,8 +143,7 @@ summary_reading = (
     )
     .assign(growth_above_target=lambda df: df["avg_growth"] - df["avg_target"])
     .query("num_students >= 5")
-    .sort_values("pct_met_goal", ascending=True)  # Sort lowest to highest
-    .reset_index()
+    .sort_values("pct_met_goal", ascending=True)
 )
 
 st.markdown("**Reading:**")
