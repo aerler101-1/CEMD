@@ -105,7 +105,7 @@ teacher_palette = sns.color_palette("tab10")
 
 # ----------------- MATH -----------------
 summary_math = (
-    df
+    df_filtered
     .dropna(subset=["math_growth", "ftf_2015_Fall_mathematics", "mat_teacher_1", "grade_2015"])
     .groupby(["mat_teacher_1", "grade_2015"], as_index=False)
     .agg(
@@ -172,4 +172,9 @@ if not summary_reading.empty:
     st.pyplot(plt)
 else:
     st.info("Not enough data for reading teacher summary.")
+    
+print("\n=== Mathematics Summary ===")
+print(summary_math.to_string(index=False))
 
+print("\n=== Reading Summary ===")
+print(summary_reading.to_string(index=False))
