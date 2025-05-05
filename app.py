@@ -124,9 +124,10 @@ if not summary_math.empty:
     barplot = sns.barplot(data=summary_math, x="mat_teacher_1", y="pct_met_goal")
     plt.ylabel("% Met Growth Goal")
     plt.xticks(rotation=45)
+    y_offset = summary_math["pct_met_goal"].min() + 0.03
     if show_counts:
         for index, row in summary_math.iterrows():
-            barplot.text(index, row.pct_met_goal + 0.01, f"n={int(row.num_students)}", ha='center', fontsize=8)
+            barplot.text(index, y_offset, f"n={int(row.num_students)}", ha='center', fontsize=8, color='black')
     st.pyplot(plt)
 else:
     st.info("Not enough data for math teacher summary.")
@@ -152,9 +153,10 @@ if not summary_reading.empty:
     barplot = sns.barplot(data=summary_reading, x="ela_teacher_1", y="pct_met_goal")
     plt.ylabel("% Met Growth Goal")
     plt.xticks(rotation=45)
+    y_offset = summary_reading["pct_met_goal"].min() + 0.03
     if show_counts:
         for index, row in summary_reading.iterrows():
-            barplot.text(index, row.pct_met_goal + 0.01, f"n={int(row.num_students)}", ha='center', fontsize=8)
+            barplot.text(index, y_offset, f"n={int(row.num_students)}", ha='center', fontsize=8, color='black')
     st.pyplot(plt)
 else:
     st.info("Not enough data for reading teacher summary.")
