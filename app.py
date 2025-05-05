@@ -99,13 +99,13 @@ if "grade_2015" in df.columns and "school_2015" in df.columns:
     sns.heatmap(crosstab, annot=True, fmt="d", cmap="YlGnBu")
     st.pyplot(plt)
 
-# Tab: Effectiveness Summary by Teacher
 st.subheader("Fall-to-Fall Growth Effectiveness by Teacher")
 
 show_counts = st.checkbox("Show number of students on chart", value=True)
+teacher_palette = sns.color_palette("tab10")
 
-# Math
-math_data = df_filtered.dropna(subset=["math_growth", "ftf_2015_Fall_mathematics", "mat_teacher_1"])
+# ----------------- MATH -----------------
+math_data = df_filtered.dropna(subset=["math_growth", "ftf_2015_Fall_mathematics", "mat_teacher_1", "grade_2015"])
 if not math_data.empty:
     summary_math = (
         math_data
@@ -120,22 +120,30 @@ if not math_data.empty:
         .query("num_students >= 5")
         .sort_values("pct_met_goal", ascending=True)
     )
-    st.markdown("**Mathematics:**")
+    
+    st.markdown("**Mathematics**")
     plt.figure(figsize=(10, 6))
-    palette = sns.color_palette("tab10", len(summary_math["grade_2015"].unique()))
-    barplot = sns.barplot(data=summary_math, x="mat_teacher_1", y="pct_met_goal", hue="grade_2015", dodge=True, palette=palette)
+    barplot = sns.barplot(
+        data=summary_math,
+        x="mat_teacher_1",
+        y="pct_met_goal",
+        hue="grade_2015",
+        palette=teacher_palette,
+        dodge=False
+    )
     plt.ylabel("% Met Growth Goal")
     plt.xticks(rotation=45)
-    y_offset = summary_math["pct_met_goal"].min() + 0.03
     if show_counts:
         for index, row in summary_math.iterrows():
-            barplot.text(index, y_offset, f"n={int(row.num_students)}", ha='center', fontsize=8, color='black')
+            barplot.text(index, row.pct_met_goal + 0.02, f"n={int(row.num_students)}", ha='center', fontsize=8, color='black')
+    plt.legend(title="Grade", bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.tight_layout()
     st.pyplot(plt)
 else:
     st.info("Not enough data for math teacher summary.")
 
-# Reading
-reading_data = df_filtered.dropna(subset=["reading_growth", "ftf_2015_Fall_reading", "ela_teacher_1"])
+# ----------------- READING -----------------
+reading_data = df_filtered.dropna(subset=["reading_growth", "ftf_2015_Fall_reading", "ela_teacher_1", "grade_2015"])
 if not reading_data.empty:
     summary_reading = (
         reading_data
@@ -150,16 +158,24 @@ if not reading_data.empty:
         .query("num_students >= 5")
         .sort_values("pct_met_goal", ascending=True)
     )
-    st.markdown("**Reading:**")
+    
+    st.markdown("**Reading**")
     plt.figure(figsize=(10, 6))
-    palette = sns.color_palette("tab10", len(summary_reading["grade_2015"].unique()))
-    barplot = sns.barplot(data=summary_reading, x="ela_teacher_1", y="pct_met_goal", hue="grade_2015", dodge=True, palette=palette)
+    barplot = sns.barplot(
+        data=summary_reading,
+        x="ela_teacher_1",
+        y="pct_met_goal",
+        hue="grade_2015",
+        palette=teacher_palette,
+        dodge=False
+    )
     plt.ylabel("% Met Growth Goal")
     plt.xticks(rotation=45)
-    y_offset = summary_reading["pct_met_goal"].min() + 0.03
     if show_counts:
         for index, row in summary_reading.iterrows():
-            barplot.text(index, y_offset, f"n={int(row.num_students)}", ha='center', fontsize=8, color='black')
+            barplot.text(index, row.pct_met_goal + 0.02, f"n={int(row.num_students)}", ha='center', fontsize=8, color='black')
+    plt.legend(title="Grade", bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.tight_layout()
     st.pyplot(plt)
 else:
     st.info("Not enough data for reading teacher summary.")
