@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 
 # Load the data
 @st.cache_data
@@ -121,7 +122,8 @@ if not math_data.empty:
     )
     st.markdown("**Mathematics:**")
     plt.figure(figsize=(10, 6))
-    barplot = sns.barplot(data=summary_math, x="mat_teacher_1", y="pct_met_goal", hue="grade_2015", dodge=True)
+    palette = sns.color_palette("tab10", len(summary_math["grade_2015"].unique()))
+    barplot = sns.barplot(data=summary_math, x="mat_teacher_1", y="pct_met_goal", hue="grade_2015", dodge=True, palette=palette)
     plt.ylabel("% Met Growth Goal")
     plt.xticks(rotation=45)
     y_offset = summary_math["pct_met_goal"].min() + 0.03
@@ -150,7 +152,8 @@ if not reading_data.empty:
     )
     st.markdown("**Reading:**")
     plt.figure(figsize=(10, 6))
-    barplot = sns.barplot(data=summary_reading, x="ela_teacher_1", y="pct_met_goal", hue="grade_2015", dodge=True)
+    palette = sns.color_palette("tab10", len(summary_reading["grade_2015"].unique()))
+    barplot = sns.barplot(data=summary_reading, x="ela_teacher_1", y="pct_met_goal", hue="grade_2015", dodge=True, palette=palette)
     plt.ylabel("% Met Growth Goal")
     plt.xticks(rotation=45)
     y_offset = summary_reading["pct_met_goal"].min() + 0.03
