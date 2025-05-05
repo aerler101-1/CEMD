@@ -174,4 +174,97 @@ if not summary_reading.empty:
     st.pyplot(plt)
 else:
     st.info("Not enough data for reading teacher summary.")
+    
+    
+    # ----------------- EFFECTIVENESS BY GRADE -----------------
+st.subheader("Fall-to-Fall Growth Effectiveness by Grade")
+
+summary_grade_math = (
+    df_filtered
+    .dropna(subset=["math_growth", "ftf_2015_Fall_mathematics", "grade_2015"])
+    .groupby("grade_2015", as_index=False)
+    .agg(
+        num_students=("met_math_growth", "count"),
+        pct_met_goal=("met_math_growth", "mean"),
+        avg_growth=("math_growth", "mean"),
+        avg_target=("ftf_2015_Fall_mathematics", "mean")
+    )
+    .assign(growth_above_target=lambda df: df["avg_growth"] - df["avg_target"])
+    .query("num_students >= 5")
+    .sort_values("grade_2015")
+)
+
+summary_grade_reading = (
+    df_filtered
+    .dropna(subset=["reading_growth", "ftf_2015_Fall_reading", "grade_2015"])
+    .groupby("grade_2015", as_index=False)
+    .agg(
+        num_students=("met_reading_growth", "count"),
+        pct_met_goal=("met_reading_growth", "mean"),
+        avg_growth=("reading_growth", "mean"),
+        avg_target=("ftf_2015_Fall_reading", "mean")
+    )
+    .assign(growth_above_target=lambda df: df["avg_growth"] - df["avg_target"])
+    .query("num_students >= 5")
+    .sort_values("grade_2015")
+)
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.markdown("**Mathematics Effectiveness by Grade:**")
+    st.dataframe(summary_grade_math.style.format({
+        "pct_met_goal": "{:.0%}",
+        "avg_growth": "{:.2f}",
+        "avg_target": "{:.2f}",
+        "growth_above_target": "{:+.2f}"
+    }))
+
+with col2:
+    st.markdown("**Reading Effectiveness by Grade:**")
+    st.dataframe(summary_grade_reading.style.format({
+        "pct_met_goal": "{:.0%}",
+        "avg_growth": "{:.2f}",
+        "avg_target": "{:.2f}",
+        "growth_above_target": "{:+.2f}"
+    }))
+
+
+# ----------------- BAR CHARTS FOR EFFECTIVENESS BY GRADE -----------------
+st.markdown("### Growth Goal Achievement by Grade")
+
+# Math Graph
+if not summary_grade_math.empty:
+    plt.figure(figsize=(8, 5))
+    sns.barplot(
+        data=summary_grade_math,
+        x="grade_2015",
+        y="pct_met_goal",
+        palette="Blues_d"
+    )
+    plt.title("Math: % Students Meeting Growth Goal by Grade")
+    plt.ylabel("% Met Growth Goal")
+    plt.xlabel("Grade")
+    plt.ylim(0, 1)
+    st.pyplot(plt)
+else:
+    st.info("Not enough data to plot math effectiveness by grade.")
+
+# Reading Graph
+if not summary_grade_reading.empty:
+    plt.figure(figsize=(8, 5))
+    sns.barplot(
+        data=summary_grade_reading,
+        x="grade_2015",
+        y="pct_met_goal",
+        palette="Greens_d"
+    )
+    plt.title("Reading: % Students Meeting Growth Goal by Grade")
+    plt.ylabel("% Met Growth Goal")
+    plt.xlabel("Grade")
+    plt.ylim(0, 1)
+    st.pyplot(plt)
+else:
+    st.info("Not enough data to plot reading effectiveness by grade.")
+
 
