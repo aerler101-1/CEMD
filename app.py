@@ -107,6 +107,7 @@ teacher_palette = sns.color_palette("tab10")
 summary_math = (
     df_filtered
     .dropna(subset=["math_growth", "ftf_2015_Fall_mathematics", "mat_teacher_1", "grade_2015"])
+    .query("mat_teacher_1 != 'nan'")
     .groupby(["mat_teacher_1", "grade_2015"], as_index=False)
     .agg(
         num_students=("met_math_growth", "count"),
@@ -115,6 +116,7 @@ summary_math = (
         avg_target=("ftf_2015_Fall_mathematics", "mean")
     )
     .assign(growth_above_target=lambda df: df["avg_growth"] - df["avg_target"])
+    .query("num_students >= 5")
     .sort_values("pct_met_goal", ascending=True)
 )
 
@@ -172,9 +174,57 @@ if not summary_reading.empty:
     st.pyplot(plt)
 else:
     st.info("Not enough data for reading teacher summary.")
-    
-print("\n=== Mathematics Summary ===")
-print(summary_math.to_string(index=False))
 
-print("\n=== Reading Summary ===")
-print(summary_reading.to_string(index=False))
+
+# ----------------- EFFECTIVENESS BY GRADE -----------------
+st.subheader("Fall-to-Fall Growth Effectiveness by Grade")
+
+summary_grade_math = (
+    df_filtered
+    .dropna(subset=["math_growth", "ftf_2015_Fall_mathematics", "grade_2015"])
+    .groupby("grade_2015", as_index=False)
+    .agg(
+        num_students=("met_math_growth", "count"),
+        pct_met_goal=("met_math_growth", "mean"),
+        avg_growth=("math_growth", "mean"),
+        avg_target=("ftf_2015_Fall_mathematics", "mean")
+    )
+    .assign(growth_above_target=lambda df: df["avg_growth"] - df["avg_target"])
+    .query("num_students >= 5")
+    .sort_values("grade_2015")
+)
+
+summary_grade_reading = (
+    df_filtered
+    .dropna(subset=["reading_growth", "ftf_2015_Fall_reading", "grade_2015"])
+    .groupby("grade_2015", as_index=False)
+    .agg(
+        num_students=("met_reading_growth", "count"),
+        pct_met_goal=("met_reading_growth", "mean"),
+        avg_growth=("reading_growth", "mean"),
+        avg_target=("ftf_2015_Fall_reading", "mean")
+    )
+    .assign(growth_above_target=lambda df: df["avg_growth"] - df["avg_target"])
+    .query("num_students >= 5")
+    .sort_values("grade_2015")
+)
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.markdown("**Mathematics Effectiveness by Grade:**")
+    st.dataframe(summary_grade_math.style.format({
+        "pct_met_goal": "{:.0%}",
+        "avg_growth": "{:.2f}",
+        "avg_target": "{:.2f}",
+        "growth_above_target": "{:+.2f}"
+    }))
+
+with col2:
+    st.markdown("**Reading Effectiveness by Grade:**")
+    st.dataframe(summary_grade_reading.style.format({
+        "pct_met_goal": "{:.0%}",
+        "avg_growth": "{:.2f}",
+        "avg_target": "{:.2f}",
+        "growth_above_target": "{:+.2f}"
+    }))
