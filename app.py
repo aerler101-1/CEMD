@@ -107,7 +107,6 @@ teacher_palette = sns.color_palette("tab10")
 summary_math = (
     df_filtered
     .dropna(subset=["math_growth", "ftf_2015_Fall_mathematics", "mat_teacher_1", "grade_2015"])
-    .query("mat_teacher_1 != 'nan'")
     .groupby(["mat_teacher_1", "grade_2015"], as_index=False)
     .agg(
         num_students=("met_math_growth", "count"),
@@ -116,7 +115,6 @@ summary_math = (
         avg_target=("ftf_2015_Fall_mathematics", "mean")
     )
     .assign(growth_above_target=lambda df: df["avg_growth"] - df["avg_target"])
-    .query("num_students >= 5")
     .sort_values("pct_met_goal", ascending=True)
 )
 
