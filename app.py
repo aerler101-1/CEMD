@@ -17,6 +17,10 @@ selected_school = st.sidebar.multiselect("School (2015)", sorted(df["school_2015
 selected_math_teacher = st.sidebar.multiselect("Math Teacher", sorted(df["mat_teacher_1"].dropna().unique()))
 selected_ela_teacher = st.sidebar.multiselect("ELA Teacher", sorted(df["ela_teacher_1"].dropna().unique()))
 quantile_option = st.sidebar.selectbox("Group students by test percentile quartile?", ["None", 4])
+teacher_change_filter = st.sidebar.selectbox(
+    "Filter by Teacher Change",
+    ["All Students", "Changed Math Teacher", "Changed ELA Teacher", "Changed Either"]
+)
 
 # Apply filters
 df_filtered = df.copy()
@@ -28,6 +32,13 @@ if selected_math_teacher:
     df_filtered = df_filtered[df_filtered["mat_teacher_1"].isin(selected_math_teacher)]
 if selected_ela_teacher:
     df_filtered = df_filtered[df_filtered["ela_teacher_1"].isin(selected_ela_teacher)]
+
+if teacher_change_filter == "Changed Math Teacher":
+    df_filtered = df_filtered[df_filtered["is_teacher_change_mat"] == True]
+elif teacher_change_filter == "Changed ELA Teacher":
+    df_filtered = df_filtered[df_filtered["is_teacher_change_ela"] == True]
+elif teacher_change_filter == "Changed Either":
+    df_filtered = df_filtered[(df_filtered["is_teacher_change_mat"] == True) | (df_filtered["is_teacher_change_ela"] == True)]
 
 # Use most recent percentile for grouping if available
 test_percentile_cols = [col for col in df_filtered.columns if col.startswith("percentile_")]
