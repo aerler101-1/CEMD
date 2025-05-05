@@ -97,17 +97,16 @@ if "grade_2015" in df.columns and "school_2015" in df.columns:
     plt.figure(figsize=(10, 6))
     sns.heatmap(crosstab, annot=True, fmt="d", cmap="YlGnBu")
     st.pyplot(plt)
-
 # Tab: Effectiveness Summary by Teacher
 st.subheader("Fall-to-Fall Growth Effectiveness by Teacher")
 
+show_counts = st.checkbox("Show number of students on chart", value=True)
 teacher_palette = sns.color_palette("tab10")
 
 # ----------------- MATH -----------------
 summary_math = (
     df_filtered
-    .dropna(subset=["math_growth", "ftf_2015_Fall_mathematics", "mat_teacher_1", "grade_2015"])
-    .query("mat_teacher_1 != 'nan'")
+    .dropna(subset=["math_growth", "ftf_2015_Fall_mathematics", "mat_teacher_1", "grade_2015"])  # NaNs filtered here
     .groupby(["mat_teacher_1", "grade_2015"], as_index=False)
     .agg(
         num_students=("met_math_growth", "count"),
@@ -133,6 +132,19 @@ if not summary_math.empty:
     )
     plt.ylabel("% Met Growth Goal")
     plt.xticks(rotation=45)
+
+    if show_counts:
+        seen = set()
+        for index, row in summary_math.iterrows():
+            teacher_id = row["mat_teacher_1"]
+            if teacher_id in seen:
+                continue
+            seen.add(teacher_id)
+            bar = barplot.patches[index]
+            x = bar.get_x() + bar.get_width() / 2
+            y = row.pct_met_goal + 0.02
+            barplot.text(x, y, f"n={int(row.num_students)}", ha='center', fontsize=8, color='black')
+
     plt.legend(title="Grade", bbox_to_anchor=(1.05, 1), loc='upper left')
     plt.tight_layout()
     st.pyplot(plt)
@@ -142,8 +154,7 @@ else:
 # ----------------- READING -----------------
 summary_reading = (
     df_filtered
-    .dropna(subset=["reading_growth", "ftf_2015_Fall_reading", "ela_teacher_1", "grade_2015"])
-    .query("ela_teacher_1 != 'nan'")
+    .dropna(subset=["reading_growth", "ftf_2015_Fall_reading", "ela_teacher_1", "grade_2015"])  # NaNs filtered here
     .groupby(["ela_teacher_1", "grade_2015"], as_index=False)
     .agg(
         num_students=("met_reading_growth", "count"),
@@ -169,6 +180,19 @@ if not summary_reading.empty:
     )
     plt.ylabel("% Met Growth Goal")
     plt.xticks(rotation=45)
+
+    if show_counts:
+        seen = set()
+        for index, row in summary_reading.iterrows():
+            teacher_id = row["ela_teacher_1"]
+            if teacher_id in seen:
+                continue
+            seen.add(teacher_id)
+            bar = barplot.patches[index]
+            x = bar.get_x() + bar.get_width() / 2
+            y = row.pct_met_goal + 0.02
+            barplot.text(x, y, f"n={int(row.num_students)}", ha='center', fontsize=8, color='black')
+
     plt.legend(title="Grade", bbox_to_anchor=(1.05, 1), loc='upper left')
     plt.tight_layout()
     st.pyplot(plt)
