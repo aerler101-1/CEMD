@@ -97,6 +97,9 @@ if "grade_2015" in df.columns and "school_2015" in df.columns:
 
 # Tab: Effectiveness Summary by Teacher
 st.subheader("Fall-to-Fall Growth Effectiveness by Teacher")
+
+show_counts = st.checkbox("Show number of students on chart", value=True)
+
 summary_math = (
     df_filtered
     .dropna(subset=["math_growth", "ftf_2015_Fall_mathematics", "mat_teacher_1"])
@@ -116,9 +119,12 @@ summary_math = (
 st.markdown("**Mathematics:**")
 if not summary_math.empty:
     plt.figure(figsize=(10, 6))
-    sns.barplot(data=summary_math, x="mat_teacher_1", y="pct_met_goal")
+    barplot = sns.barplot(data=summary_math, x="mat_teacher_1", y="pct_met_goal")
     plt.ylabel("% Met Growth Goal")
     plt.xticks(rotation=45)
+    if show_counts:
+        for index, row in summary_math.iterrows():
+            barplot.text(index, row.pct_met_goal + 0.01, f"n={int(row.num_students)}", ha='center', fontsize=8)
     st.pyplot(plt)
 else:
     st.info("Not enough data for math teacher summary.")
@@ -142,9 +148,12 @@ summary_reading = (
 st.markdown("**Reading:**")
 if not summary_reading.empty:
     plt.figure(figsize=(10, 6))
-    sns.barplot(data=summary_reading, x="ela_teacher_1", y="pct_met_goal")
+    barplot = sns.barplot(data=summary_reading, x="ela_teacher_1", y="pct_met_goal")
     plt.ylabel("% Met Growth Goal")
     plt.xticks(rotation=45)
+    if show_counts:
+        for index, row in summary_reading.iterrows():
+            barplot.text(index, row.pct_met_goal + 0.01, f"n={int(row.num_students)}", ha='center', fontsize=8)
     st.pyplot(plt)
 else:
     st.info("Not enough data for reading teacher summary.")
