@@ -112,7 +112,7 @@ summary_math = (
     )
     .assign(growth_above_target=lambda df: df["avg_growth"] - df["avg_target"])
     .query("num_students >= 5")
-    .sort_values("pct_met_goal", ascending=False)
+    .sort_values("pct_met_goal", ascending=True)  # Sort lowest to highest
     .reset_index()
 )
 
@@ -141,7 +141,7 @@ summary_reading = (
     )
     .assign(growth_above_target=lambda df: df["avg_growth"] - df["avg_target"])
     .query("num_students >= 5")
-    .sort_values("pct_met_goal", ascending=False)
+    .sort_values("pct_met_goal", ascending=True)  # Sort lowest to highest
     .reset_index()
 )
 
