@@ -1,10 +1,3 @@
-
-# CEMD: Coupled Electric and Magnetic Dipoles Analysis
-
-## 📊 Overview
-
-This repository contains the CEMD (Coupled Electric and Magnetic Dipoles) project, which focuses on analyzing and visualizing student growth data through a Streamlit-based interactive dashboard. The project encompasses data wrangling, visualization, and user-friendly exploration of key educational metrics like RIT growth and effectiveness by teacher and grade.
-
 ## 📁 Repository Contents
 
 - **`CEMD.ipynb`**: Jupyter Notebook containing the main data exploration and visualization code.
